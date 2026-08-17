@@ -3,37 +3,47 @@ import { main } from "./mogodbConection.js";
 import Holding from "./models/Holding.js";
 import Position from "./models/Position.js";
 import cors from 'cors';
-const app = express();
-const allowedOrigins = [
-  'http://localhost:3000', // Allows local testing
-  'http://localhost:5173', // Allows local Vite testing if used
-  'https://zerodha-dgx2-blond.vercel.app' // 🟢 YOUR EXACT DEPLOYED FRONTEND
-];
+import dotenv from 'dotenv'; // 🟢 1. Import dotenv to read environment configurations
 
+// Load variables from your .env file
+dotenv.config();
+
+const app = express();
+
+// 🟢 2. Fetch URLs dynamically from environment variables, fallback to local variables if undefined
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',') // Turns "http://url1,https://url2" into an Array
+  : [
+      'http://localhost:3000', 
+      'http://localhost:5173'
+    ];
+
+// 🟢 3. Clear and unified CORS configuration setup
 app.use(cors({
   origin: function (origin, callback) {
     // Allows server-to-server or postman requests with no origin header
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      const msg = `The CORS policy for this site does not allow access from origin: ${origin}`;
       return callback(new Error(msg), false);
     }
-    return callback(null, true);
   },
-  credentials: true // Enable this if you pass JWT tokens/cookies
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Handles methods globally
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"] // Handles headers globally
 }));
-app.use(express.json());
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    next();
-});
 
-app.get("/status",(req,res)=>{
+app.use(express.json());
+
+// ⚠️ Note: The old hardcoded manual header middleware block has been removed from here 
+// because it was conflicting with your live Vercel URL and breaking production.
+
+app.get("/status", (req, res) => {
     res.send("This is the server runing");
-})
+});
 
 app.post("/holdings", async (req, res) => {
     try {
@@ -83,5 +93,3 @@ main()
         console.error("MongoDB connection failed:", error.message);
         process.exit(1);
     });
-
-
