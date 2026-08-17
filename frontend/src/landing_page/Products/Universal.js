@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Link } from "react-router-dom";
 const Universal = () => {
   return (
     <div>
@@ -67,7 +67,9 @@ sectors, supply chains, and more.
         </div>
         <br></br>
         <br></br>
-          <button className='p-3 btn btn-primary' style={{width:"20%",margin:"0 auto"}}>Singup Now</button>
+        <Link to="/singup"  state={{alignItems:"center",display:"flex"}}>
+           <button className='p-3 btn btn-primary' style={{width:"20%",margin:"0 auto",display:"flex",justifyContent:"center"}}>Singup Now</button>
+           </Link>
       </div>
      
     </div>

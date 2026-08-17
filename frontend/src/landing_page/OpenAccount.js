@@ -1,3 +1,4 @@
+import { SignUp } from '@clerk/clerk-react'
 import React from 'react'
 
 const OpenAccount = () => {
@@ -6,7 +7,13 @@ const OpenAccount = () => {
         <div className='row text-center' >
             <h1>Open a Zerodha account</h1>
             <p style={{color:"gray",marginTop:"30px",marginBottom:"30px"}}>Simple and intuitive apps · ₹0 for investments · ₹20 for intraday and F&O trades.</p>
-            <button className='p-3 btn btn-primary' style={{width:"20%",margin:"0 auto"}}>Singup for free</button>
+            <SignUp
+              routing="path"
+              path="/singup"
+              fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "/"}
+              signInUrl="/sign-in"
+            
+            />
         </div>
     </div>
   )

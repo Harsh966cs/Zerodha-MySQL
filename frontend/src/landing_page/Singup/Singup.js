@@ -7,12 +7,14 @@ const Singup = () => {
         <div className='row text-center' >
             <h1>Open a Zerodha account</h1>
             <p style={{color:"gray",marginTop:"30px",marginBottom:"30px"}}>Simple and intuitive apps · ₹0 for investments · ₹20 for intraday and F&O trades.</p>
-            <SignUp
+            <p style={{marginLeft:"33%"}}>
+            <SignUp 
               routing="path"
               path="/singup"
               fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "/"}
               signInUrl="/sign-in"
             />
+            </p>
         </div>
     </div>
   )
