@@ -10,21 +10,27 @@ dotenv.config();
 
 const app = express();
 
-// 🟢 2. Fetch URLs dynamically from environment variables, fallback to local variables if undefined
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',') // Turns "http://url1,https://url2" into an Array
-  : [
-      'http://localhost:3000', 
-      'http://localhost:5173',
-      'https://zerodha-dgx2-blond.vercel.app'
-    ];
+// 🟢 2. Fetch URLs dynamically from environment variables, and ALWAYS merge in
+// local dev origins so localhost keeps working even when ALLOWED_ORIGINS is set on Render.
+const envOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : [];
+
+const defaultOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://zerodha-dgx2-blond.vercel.app'
+];
+
+// Merge + dedupe so both env-configured origins and local dev origins are always allowed
+const allowedOrigins = [...new Set([...envOrigins, ...defaultOrigins])];
 
 // 🟢 3. Clear and unified CORS configuration setup
 app.use(cors({
   origin: function (origin, callback) {
     // Allows server-to-server or postman requests with no origin header
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     } else {
@@ -38,9 +44,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-// ⚠️ Note: The old hardcoded manual header middleware block has been removed from here 
-// because it was conflicting with your live Vercel URL and breaking production.
 
 app.get("/status", (req, res) => {
     res.send("This is the server runing");
