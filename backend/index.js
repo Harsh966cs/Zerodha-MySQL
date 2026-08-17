@@ -2,8 +2,9 @@ import express from "express";
 import { main } from "./mogodbConection.js";
 import Holding from "./models/Holding.js";
 import Position from "./models/Position.js";
-
+import cors from 'cors';
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
