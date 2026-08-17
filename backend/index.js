@@ -4,7 +4,25 @@ import Holding from "./models/Holding.js";
 import Position from "./models/Position.js";
 import cors from 'cors';
 const app = express();
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000', // Allows local testing
+  'http://localhost:5173', // Allows local Vite testing if used
+  'https://zerodha-dgx2-blond.vercel.app' // 🟢 YOUR EXACT DEPLOYED FRONTEND
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allows server-to-server or postman requests with no origin header
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true // Enable this if you pass JWT tokens/cookies
+}));
 app.use(express.json());
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
