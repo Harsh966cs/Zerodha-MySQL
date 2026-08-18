@@ -1,14 +1,31 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useAuth, ClerkProvider } from '@clerk/clerk-react';
 import { Link } from "react-router-dom";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 
+const clerkPublishableKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
+const afterSignUpUrl = process.env.REACT_APP_AFTER_SIGN_UP_URL || "/";
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const {isSignedIn} = useAuth();
 
+
+
+   useEffect(()=>{
+        if(isSignedIn===false){
+          window.location.assign("http://localhost:3000")
+        }
+   },[isSignedIn])
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
   };
+
+  const handleLogout = () =>{
+     console.log("hello world")
+    window.location.assign('http://localhost:3000/')
+  }
 
   const handleProfileClick = (index) => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
@@ -18,6 +35,7 @@ const Menu = () => {
   const activeMenuClass = "menu selected";
 
   return (
+    
     <div className="menu-container">
       <img src="logo.png" style={{ width: "50px" }} alt="logo" />
       <div className="menus">
@@ -90,10 +108,15 @@ const Menu = () => {
           </li>
         </ul>
         <hr />
-        <div className="profile" onClick={handleProfileClick}>
-          <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
-        </div>
+      
+   
+   
+       <header>
+            <SignedIn  >
+                   <UserButton/>
+            </SignedIn>
+      </header>
+      
       </div>
     </div>
   );

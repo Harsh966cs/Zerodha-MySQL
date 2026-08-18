@@ -11,7 +11,7 @@ const Singup = () => {
             <SignUp 
               routing="path"
               path="/singup"
-              fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "/"}
+              fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "http://localhost:3001/"}
               signInUrl="/sign-in"
             />
             </p>
