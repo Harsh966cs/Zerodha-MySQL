@@ -10,20 +10,15 @@ dotenv.config();
 
 const app = express();
 
-// 🟢 2. Fetch URLs dynamically from environment variables, and ALWAYS merge in
-// local dev origins so localhost keeps working even when ALLOWED_ORIGINS is set on Render.
-const envOrigins = process.env.ALLOWED_ORIGINS
+// 🟢 2. Fetch allowed origins strictly from the environment variable.
+// No hardcoded fallback — if ALLOWED_ORIGINS isn't set, no cross-origin requests are allowed.
+if (!process.env.ALLOWED_ORIGINS) {
+  console.warn("⚠️ ALLOWED_ORIGINS is not set. No cross-origin requests will be allowed.");
+}
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
   : [];
-
-const defaultOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'https://zerodha-dgx2-blond.vercel.app'
-];
-
-// Merge + dedupe so both env-configured origins and local dev origins are always allowed
-const allowedOrigins = [...new Set([...envOrigins, ...defaultOrigins])];
 
 // 🟢 3. Clear and unified CORS configuration setup
 app.use(cors({

@@ -10,7 +10,7 @@ const OpenAccount = () => {
             <SignUp
               routing="path"
               path="/singup"
-              fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "/"}
+              fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "/about"}
               signInUrl="/sign-in"
             
             />

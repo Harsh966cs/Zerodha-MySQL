@@ -6,7 +6,7 @@ const Signin = () => (
     <SignIn
       routing="path"
       path="/sign-in"
-      fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "/"}
+      fallbackRedirectUrl={process.env.REACT_APP_AFTER_SIGN_UP_URL || "http://localhost:3001/"}
       signUpUrl="/singup"
     />
   </div>
