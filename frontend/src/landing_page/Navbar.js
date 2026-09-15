@@ -70,8 +70,7 @@ function PlaceholderImg({ size = 48, src }) {
 function Navbar1() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const { isSignedIn } = useAuth();
-  const dashboardUrl =
-    process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001";
+  const dashboardUrl = process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001";
 
   React.useEffect(() => {
     if (isSignedIn && window.location.origin !== dashboardUrl) {
