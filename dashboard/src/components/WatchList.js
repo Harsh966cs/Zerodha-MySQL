@@ -1,6 +1,7 @@
-import React, { useState, useContext } from "react";
 
-
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 import GeneralContext from "./GeneralContext";
 
 import { Tooltip, Grow } from "@mui/material";
@@ -12,18 +13,63 @@ import {
   MoreHoriz,
 } from "@mui/icons-material";
 
-import { watchlist } from "../data/data";
 import { DoughnutChart } from "./DoughnoutChart";
 
-const labels = watchlist.map((subArray) => subArray["name"]);
-
 const WatchList = () => {
+  const [watchlist, setWatchlist] = useState([]);
+  const [stocks, setStocks] = useState([]);
+  const [search, setSearch] = useState("");
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    const loadStocks = async () => {
+      try {
+        const token = await getToken();
+        const headers = { Authorization: `Bearer ${token}` };
+        const [stockResponse, watchlistResponse] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_API_URL}/api/stocks`, { headers }),
+          axios.get(`${process.env.REACT_APP_API_URL}/api/watchlist`, { headers }),
+        ]);
+        setStocks(stockResponse.data);
+        setWatchlist(watchlistResponse.data);
+      } catch (error) {
+        console.error("Unable to fetch stocks:", error);
+      }
+    };
+    loadStocks();
+  }, [getToken]);
+
+  const addToWatchlist = async (stock) => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/watchlist`,
+        { stockId: stock.id },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setWatchlist((current) => [...current, stock]);
+      setSearch("");
+    } catch (error) {
+      console.error("Unable to add stock to watchlist:", error);
+    }
+  };
+
+  const visibleStocks = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const watchedIds = new Set(watchlist.map((stock) => stock.id));
+    return stocks
+      .filter((stock) => !watchedIds.has(stock.id))
+      .filter((stock) => !query || stock.symbol.toLowerCase().includes(query))
+      .slice(0, 5);
+  }, [search, stocks, watchlist]);
+
+  const labels = watchlist.map((stock) => stock.symbol);
   const data = {
     labels,
     datasets: [
       {
         label: "Price",
-        data: watchlist.map((stock) => stock.price),
+        data: watchlist.map((stock) => Number(stock.price)),
         backgroundColor: [
           "rgba(255, 99, 132, 0.5)",
           "rgba(54, 162, 235, 0.5)",
@@ -81,13 +127,27 @@ const WatchList = () => {
           id="search"
           placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
           className="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
         />
         <span className="counts"> {watchlist.length} / 50</span>
       </div>
 
+      {search && visibleStocks.length > 0 && (
+        <ul className="list">
+          {visibleStocks.map((stock) => (
+            <li key={stock.id}>
+              <button type="button" className="action" onClick={() => addToWatchlist(stock)}>
+                Add {stock.symbol}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <ul className="list">
-        {watchlist.map((stock, index) => {
-          return <WatchListItem stock={stock} key={index} />;
+        {watchlist.map((stock) => {
+          return <WatchListItem stock={stock} key={stock.id} />;
         })}
       </ul>
 
@@ -112,18 +172,18 @@ const WatchListItem = ({ stock }) => {
   return (
     <li onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <div className="item">
-        <p className={stock.isDown ? "down" : "up"}>{stock.name}</p>
+        <p className={Number(stock.day_change) < 0 ? "down" : "up"}>{stock.symbol}</p>
         <div className="itemInfo">
-          <span className="percent">{stock.percent}</span>
-          {stock.isDown ? (
+          <span className="percent">{Number(stock.day_change).toFixed(2)}%</span>
+          {Number(stock.day_change) < 0 ? (
             <KeyboardArrowDown className="down" />
           ) : (
             <KeyboardArrowUp className="down" />
           )}
-          <span className="price">{stock.price}</span>
+          <span className="price">{Number(stock.price).toFixed(2)}</span>
         </div>
       </div>
-      {showWatchlistActions && <WatchListActions uid={stock.name} />}
+      {showWatchlistActions && <WatchListActions uid={stock.symbol} />}
     </li>
   );
 };

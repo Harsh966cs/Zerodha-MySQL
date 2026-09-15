@@ -377,6 +377,33 @@ hr {
   background: rgb(110, 110, 253);
 }
 
+.apps {
+  margin-top: 32px;
+}
+
+.apps .form {
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+  margin-top: 24px;
+}
+
+.apps input,
+.apps select {
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid #dfe3e8;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.apps .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .title {
   font-size: 1.3rem;
   font-weight: 300;
@@ -841,6 +868,5 @@ hr {
 .action:hover {
   background-color: rgb(212, 212, 212);
 }
-
 
 

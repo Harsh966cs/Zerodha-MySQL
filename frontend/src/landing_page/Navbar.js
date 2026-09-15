@@ -70,12 +70,14 @@ function PlaceholderImg({ size = 48, src }) {
 function Navbar1() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const { isSignedIn } = useAuth();
+  const dashboardUrl =
+    process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001";
 
   React.useEffect(() => {
-    if (isSignedIn && window.location.origin !== 'http://localhost:3001') {
-      window.location.assign('http://localhost:3001/');
+    if (isSignedIn && window.location.origin !== dashboardUrl) {
+      window.location.assign(`${dashboardUrl}/`);
     }
-  }, [isSignedIn]);
+  }, [dashboardUrl, isSignedIn]);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);

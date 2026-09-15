@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 
 const clerkPublishableKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 const afterSignUpUrl = process.env.REACT_APP_AFTER_SIGN_UP_URL || "/";
+const frontendUrl = process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -15,7 +16,7 @@ const Menu = () => {
 
    useEffect(()=>{
         if(isSignedIn===false){
-          window.location.assign("http://localhost:3000")
+          window.location.assign(frontendUrl)
         }
    },[isSignedIn])
   const handleMenuClick = (index) => {
@@ -24,7 +25,7 @@ const Menu = () => {
 
   const handleLogout = () =>{
      console.log("hello world")
-    window.location.assign('http://localhost:3000/')
+    window.location.assign(`${frontendUrl}/`)
   }
 
   const handleProfileClick = (index) => {
@@ -87,7 +88,7 @@ const Menu = () => {
           <li>
             <Link
               style={{ textDecoration: "none" }}
-              to="funds"
+              to="/funds"
               onClick={() => handleMenuClick(4)}
             >
               <p className={selectedMenu === 4 ? activeMenuClass : menuClass}>

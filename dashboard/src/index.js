@@ -9,13 +9,14 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const clerkPublishableKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 const afterSignUpUrl = process.env.REACT_APP_AFTER_SIGN_UP_URL || "/";
+const frontendUrl = process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
 
 function AuthGate({ children }) {
   const { isSignedIn } = useAuth();
 
   useEffect(() => {
     if (isSignedIn === false) {
-      window.location.assign("http://localhost:3000");
+      window.location.assign(frontendUrl);
     }
   }, [isSignedIn]);
 

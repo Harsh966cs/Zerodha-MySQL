@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 
 const Positions = () => {
   const [positions, setPositions] = useState([]);
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/positions`)
-      .then((res) => setPositions(res.data))
-      .catch((error) => console.error("Unable to fetch positions:", error));
-  }, []);
+    const loadPositions = async () => {
+      try {
+        const token = await getToken();
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/positions`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPositions(response.data);
+      } catch (error) {
+        console.error("Unable to fetch positions:", error);
+      }
+    };
+    loadPositions();
+  }, [getToken]);
 
   return (
     <>
@@ -28,8 +38,11 @@ const Positions = () => {
           </tr>
 
           {positions.map((stock, index) => {
-            const curValue = stock.price * stock.qty;
-            const isProfit = curValue - stock.avg * stock.qty >= 0.0;
+            const price = Number(stock.price);
+            const qty = Number(stock.qty);
+            const avg = Number(stock.avg);
+            const curValue = price * qty;
+            const isProfit = curValue - avg * qty >= 0.0;
             const profClass = isProfit ? "profit" : "loss";
             const dayClass = stock.isLoss ? "loss" : "profit";
 
@@ -37,11 +50,11 @@ const Positions = () => {
               <tr key={index}>
                 <td>{stock.product}</td>
                 <td>{stock.name}</td>
-                <td>{stock.qty}</td>
-                <td>{stock.avg.toFixed(2)}</td>
-                <td>{stock.price.toFixed(2)}</td>
+                <td>{qty}</td>
+                <td>{avg.toFixed(2)}</td>
+                <td>{price.toFixed(2)}</td>
                 <td className={profClass}>
-                  {(curValue - stock.avg * stock.qty).toFixed(2)}
+                  {(curValue - avg * qty).toFixed(2)}
                 </td>
                 <td className={dayClass}>{stock.day}</td>
               </tr>

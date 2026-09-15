@@ -1,17 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 import { VerticalGraph } from "./VerticalGraph";
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    console.log(process.env.REACT_APP_API_URL)
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/holdings`)
-      .then((res) => setAllHoldings(res.data))
-      .catch((error) => console.error("Unable to fetch holdings:", error));
-  }, []);
+    const loadHoldings = async () => {
+      try {
+        const token = await getToken();
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/holdings`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAllHoldings(response.data);
+      } catch (error) {
+        console.error("Unable to fetch holdings:", error);
+      }
+    };
+    loadHoldings();
+  }, [getToken]);
 
   
   // const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
@@ -62,20 +71,23 @@ const Holdings = () => {
           </tr>
 
           {allHoldings.map((stock, index) => {
-            const curValue = stock.price * stock.qty;
-            const isProfit = curValue - stock.avg * stock.qty >= 0.0;
+            const price = Number(stock.price);
+            const qty = Number(stock.qty);
+            const avg = Number(stock.avg);
+            const curValue = price * qty;
+            const isProfit = curValue - avg * qty >= 0.0;
             const profClass = isProfit ? "profit" : "loss";
-            const dayClass = stock.day.startsWith("-") ? "loss" : "profit";
+            const dayClass = Number(stock.day) < 0 ? "loss" : "profit";
 
             return (
               <tr key={index}>
                 <td>{stock.name}</td>
-                <td>{stock.qty}</td>
-                <td>{stock.avg.toFixed(2)}</td>
-                <td>{stock.price.toFixed(2)}</td>
+                <td>{qty}</td>
+                <td>{avg.toFixed(2)}</td>
+                <td>{price.toFixed(2)}</td>
                 <td>{curValue.toFixed(2)}</td>
                 <td className={profClass}>
-                  {(curValue - stock.avg * stock.qty).toFixed(2)}
+                  {(curValue - avg * qty).toFixed(2)}
                 </td>
                 <td className={profClass}>{stock.net}</td>
                 <td className={dayClass}>{stock.day}</td>

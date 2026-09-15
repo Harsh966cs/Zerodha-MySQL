@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import React, { useContext, useState } from "react";
 import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 
 import GeneralContext from "./GeneralContext";
 
@@ -10,20 +9,27 @@ import "./BuyActionWindow.css";
 const BuyActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
+  const [error, setError] = useState("");
+  const { getToken } = useAuth();
+  const { closeBuyWindow } = useContext(GeneralContext);
 
-  const handleBuyClick = () => {
-    axios.post("http://localhost:3002/newOrder", {
-      name: uid,
-      qty: stockQuantity,
-      price: stockPrice,
-      mode: "BUY",
-    });
-
-    GeneralContext.closeBuyWindow();
+  const handleBuyClick = async () => {
+    try {
+      setError("");
+      const token = await getToken();
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/buy`,
+        { symbol: uid, qty: Number(stockQuantity), price: Number(stockPrice) },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      closeBuyWindow();
+    } catch (requestError) {
+      setError(requestError.response?.data?.error || "Unable to place buy order.");
+    }
   };
 
   const handleCancelClick = () => {
-    GeneralContext.closeBuyWindow();
+    closeBuyWindow();
   };
 
   return (
@@ -52,17 +58,18 @@ const BuyActionWindow = ({ uid }) => {
             />
           </fieldset>
         </div>
+        {error && <p className="error">{error}</p>}
       </div>
 
       <div className="buttons">
         <span>Margin required ₹140.65</span>
         <div>
-          <Link className="btn btn-blue" onClick={handleBuyClick}>
+          <button type="button" className="btn btn-blue" onClick={handleBuyClick}>
             Buy
-          </Link>
-          <Link to="" className="btn btn-grey" onClick={handleCancelClick}>
+          </button>
+          <button type="button" className="btn btn-grey" onClick={handleCancelClick}>
             Cancel
-          </Link>
+          </button>
         </div>
       </div>
     </div>
